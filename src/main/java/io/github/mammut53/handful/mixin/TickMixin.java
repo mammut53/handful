@@ -1,4 +1,4 @@
-package io.github.mammut53.example.mixin;
+package io.github.mammut53.handful.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,4 +1,4 @@
-package io.github.mammut53.example.platform;
+package io.github.mammut53.handful.platform;
 
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;

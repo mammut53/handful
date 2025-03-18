@@ -12,16 +12,16 @@
     "sources": "${mod_sources}"
   },
   "license": "${mod_license}",
-  "icon": "assets/example/icon.png",
+  "icon": "assets/handful/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.mammut53.example.Example"
+      "io.github.mammut53.handful.Handful"
     ]
   },
   "mixins": [
-    "example.mixins.json",
-    "example-fabric.mixins.json"
+    "handful.mixins.json",
+    "handful-fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14",
@@ -32,5 +32,5 @@
   "custom": {
     "loom:injected_interfaces": {}
   },
-  "accessWidener" : "example.accesswidener"
+  "accessWidener" : "handful.accesswidener"
 }

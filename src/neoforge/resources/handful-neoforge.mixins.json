@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "io.github.mammut53.example.mixin",
+  "package": "io.github.mammut53.handful.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [],

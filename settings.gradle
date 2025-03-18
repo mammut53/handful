@@ -18,4 +18,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'unimined-template'
+rootProject.name = "handful"

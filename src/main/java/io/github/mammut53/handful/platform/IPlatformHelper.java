@@ -1,4 +1,4 @@
-package io.github.mammut53.example.platform;
+package io.github.mammut53.handful.platform;
 
 public interface IPlatformHelper {
     IPlatformHelper INSTANCE = ImplLoader.load(IPlatformHelper.class);
