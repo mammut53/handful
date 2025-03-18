@@ -1,0 +1,168 @@
+plugins {
+    id "java"
+    id "xyz.wagyourtail.unimined" version "1.3.13"
+}
+
+group group
+version version
+
+base {
+    archivesName = mod_name
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+
+    withSourcesJar()
+}
+
+// TODO this is just here so we can test the outputs easier and clean between tests
+unimined.useGlobalCache = false
+
+sourceSets {
+    fabric
+    neoforge
+}
+
+repositories {
+    unimined.neoForgedMaven()
+    unimined.spongeMaven()
+    unimined.modrinthMaven()
+    unimined.wagYourMaven("releases")
+}
+
+unimined.minecraft {
+    version minecraft_version
+
+    mappings {
+        mojmap()
+        officialMappingsFromJar()
+
+        devNamespace "mojmap"
+        devFallbackNamespace "official"
+    }
+
+    accessWidener {
+        accessWidener "${projectDir}/src/main/resources/${mod_id}.accesswidener"
+    }
+
+    if (sourceSet == sourceSets.main) {
+        defaultRemapJar = false
+    }
+
+    runs {
+        off = true
+    }
+}
+
+unimined.minecraft(sourceSets.fabric) {
+    combineWith(sourceSets.main)
+
+    fabric {
+        loader fabric_loader
+        accessWidener "${projectDir}/src/main/resources/${mod_id}.accesswidener"
+    }
+
+    defaultRemapJar = true
+
+    runs {
+        off = false
+
+        config("client") {
+            jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
+
+            def mixinJar = configurations.runtimeClasspath.files.find { it.name.contains("mixin") }
+            if (mixinJar != null) {
+                jvmArgs += "-javaagent:${mixinJar.absolutePath}"
+            }
+
+            workingDir = file("$projectDir/run/fabric/client")
+        }
+
+        config("server") {
+            jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
+
+            def mixinJar = configurations.runtimeClasspath.files.find { it.name.contains("mixin") }
+            if (mixinJar != null) {
+                jvmArgs += "-javaagent:${mixinJar.absolutePath}"
+            }
+
+            workingDir = file("$projectDir/run/fabric/server")
+        }
+    }
+}
+
+unimined.minecraft(sourceSets.neoforge) {
+    combineWith(sourceSets.main)
+
+    neoForge() {
+        loader neoforge_version
+        mixinConfig("${mod_id}.mixins.json", "${mod_id}-neoforge.mixins.json")
+        accessTransformer aw2at("${projectDir}/src/main/resources/${mod_id}.accesswidener")
+    }
+
+    defaultRemapJar = true
+
+    runs {
+        off = false
+
+        config("client") {
+            jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
+
+            def mixinJar = configurations.runtimeClasspath.files.find { it.name.contains("mixin") }
+            if (mixinJar != null) {
+                jvmArgs += "-javaagent:${mixinJar.absolutePath}"
+            }
+
+            workingDir = file("$projectDir/run/neoforge/client")
+        }
+
+        config("server") {
+            jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
+
+            def mixinJar = configurations.runtimeClasspath.files.find { it.name.contains("mixin") }
+            if (mixinJar != null) {
+                jvmArgs += "-javaagent:${mixinJar.absolutePath}"
+            }
+
+            workingDir = file("$projectDir/run/neoforge/server")
+        }
+    }
+}
+
+configurations {
+    mainImplementation
+}
+
+dependencies {
+    implementation "org.spongepowered:mixin:0.8.7-SNAPSHOT"
+
+    fabricModImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
+    fabricModImplementation "maven.modrinth:modmenu:${modmenu}"
+}
+
+processResources {
+    inputs.property "version", version
+
+    filesMatching("pack.mcmeta") {
+        expand project.properties
+    }
+}
+
+processFabricResources {
+    inputs.property "version", version
+
+    filesMatching("fabric.mod.json") {
+        expand project.properties
+    }
+}
+
+processNeoforgeResources {
+    inputs.property "version", version
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand project.properties
+    }
+}
