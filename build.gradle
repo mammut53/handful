@@ -136,6 +136,8 @@ configurations {
 dependencies {
     implementation "org.spongepowered:mixin:0.8.7-SNAPSHOT"
 
+    // Fabric API for Mod Menu
+    fabricModImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
     fabricModImplementation "maven.modrinth:modmenu:${modmenu}"
 }
 
