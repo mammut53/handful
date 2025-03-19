@@ -166,3 +166,11 @@ processNeoforgeResources {
 tasks.withType(Jar).configureEach {
     from("LICENSE") {}
 }
+
+tasks.named("remapFabricJar") {
+    archiveFileName = "${mod_name}-${version}-fabric+mc${minecraft_version}.jar"
+}
+
+tasks.named("remapNeoforgeJar") {
+    archiveFileName = "${mod_name}-${version}-neoforge+mc${minecraft_version}.jar"
+}
