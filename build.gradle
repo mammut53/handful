@@ -96,7 +96,7 @@ unimined.minecraft(sourceSets.neoforge) {
 
     neoForge() {
         loader neoforge_version
-        mixinConfig("${mod_id}.mixins.json", "${mod_id}-neoforge.mixins.json")
+        mixinConfig("${mod_id}.mixins.json")
         accessTransformer aw2at("${projectDir}/src/main/resources/${mod_id}.accesswidener")
     }
 
