@@ -18,19 +18,17 @@ ${mod_description}
 
 [[mixins]]
 config = "${mod_id}.mixins.json"
-[[mixins]]
-config = "${mod_id}-neoforge.mixins.json"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"
 versionRange="[21.0.0-beta,)"
 ordering="NONE"
-side="BOTH"
+side="CLIENT"
 
 [[dependencies.${mod_id}]]
 modId="minecraft"
 type="required"
 versionRange="[1.21,1.21.1)"
 ordering="NONE"
-side="BOTH"
+side="CLIENT"

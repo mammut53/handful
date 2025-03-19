@@ -5,6 +5,8 @@ import net.fabricmc.api.ModInitializer;
 public class Handful implements ModInitializer {
 
     @Override
-    public void onInitialize() {}
+    public void onInitialize() {
+        HandfulCommon.initialize();
+    }
 
 }

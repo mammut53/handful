@@ -4,12 +4,11 @@
   "package": "io.github.mammut53.handful.mixin",
   "compatibilityLevel": "JAVA_21",
   "refmap": "handful.mixins.refmap.json",
-  "mixins": [
-    "TickMixin"
+  "mixins": [],
+  "client": [
+    "client.renderer.ItemInHandRendererMixin",
+    "client.renderer.entity.layers.ItemInHandLayerMixin"
   ],
-  "client": [],
   "server": [],
-  "injectors": {
-    "defaultRequire": 1
-  }
+  "injectors": {}
 }
