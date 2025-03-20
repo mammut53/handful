@@ -11,12 +11,14 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,14 +28,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemInHandLayer.class)
-public abstract class ItemInHandLayerMixin<T extends LivingEntity, M extends EntityModel<T> & ArmedModel> extends RenderLayer<T, M> {
+public abstract class ItemInHandLayerMixin<S extends LivingEntityRenderState, M extends EntityModel<S> & ArmedModel> extends RenderLayer<S, M> {
 
     @Shadow @Final
-    private ItemInHandRenderer itemInHandRenderer;
+    private ItemRenderer itemRenderer;
     @Unique
     private final RandomSource random = RandomSource.create();
 
-    protected ItemInHandLayerMixin(final RenderLayerParent<T, M> renderLayerParent) {
+    protected ItemInHandLayerMixin(final RenderLayerParent<S, M> renderLayerParent) {
         super(renderLayerParent);
     }
 
@@ -41,44 +43,34 @@ public abstract class ItemInHandLayerMixin<T extends LivingEntity, M extends Ent
             method = "renderArmWithItem",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"
+                    target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;render(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/client/resources/model/BakedModel;)V"
             ),
             cancellable = true
     )
-    private void injectItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final HumanoidArm humanoidArm, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light, final CallbackInfo ci) {
-        this.renderItemCluster(livingEntity, itemStack, itemDisplayContext, humanoidArm, poseStack, multiBufferSource, light);
+    private void injectItemCluster(final S livingEntityRenderState, final @Nullable BakedModel bakedModel, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final HumanoidArm humanoidArm, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light, final CallbackInfo ci) {
+        this.renderItemCluster(livingEntityRenderState, bakedModel, itemStack, itemDisplayContext, humanoidArm, poseStack, multiBufferSource, light);
         poseStack.popPose();
         ci.cancel();
     }
 
     @Unique
-    private void renderItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final HumanoidArm humanoidArm, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
+    private void renderItemCluster(final S livingEntityRenderState, final @Nullable BakedModel model, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final HumanoidArm humanoidArm, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
         final boolean isLeft = humanoidArm == HumanoidArm.LEFT;
 
-        final Minecraft minecraft = Minecraft.getInstance();
-        final ItemRenderer itemRenderer = minecraft.getItemRenderer();
-        final BakedModel model = itemRenderer.getModel(itemStack, livingEntity.level(), livingEntity, light);
-
-        final boolean isGui3d = model.isGui3d();
+        final boolean isGui3d = model != null && model.isGui3d();
         if (isGui3d) {
-            this.itemInHandRenderer.renderItem(livingEntity, itemStack, itemDisplayContext, isLeft, poseStack, multiBufferSource, light);
+            this.itemRenderer.render(itemStack, itemDisplayContext, isLeft, poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY, model);
             return;
         }
-
-        // Workaround for rendering just one item each step and being able to control the directions,
-        // because Minecraft originally, and now we are calling itemInHandRenderer which we also
-        // modified to render multiple items.
-        final ItemStack itemStackWithCountOne = itemStack.copy();
-        itemStackWithCountOne.setCount(1);
 
         this.random.setSeed(ItemEntityRenderer.getSeedForItemStack(itemStack));
 
         final int renderedAmount = ItemEntityRenderer.getRenderedAmount(itemStack.getCount());
 
-        final float scaleZ = switch (humanoidArm) {
+        final float scaleZ = model != null ? switch (humanoidArm) {
             case LEFT -> model.getTransforms().thirdPersonLeftHand.scale.z();
             case RIGHT -> model.getTransforms().thirdPersonRightHand.scale.z();
-        };
+        } : 1.0F;
 
         poseStack.translate(0.0F, 0.0F, -0.01F);
 
@@ -91,7 +83,7 @@ public abstract class ItemInHandLayerMixin<T extends LivingEntity, M extends Ent
                 poseStack.translate(randomTranslateX, randomTranslateY, 0.0F);
             }
 
-            this.itemInHandRenderer.renderItem(livingEntity, itemStackWithCountOne, itemDisplayContext, isLeft, poseStack, multiBufferSource, light);
+            this.itemRenderer.render(itemStack, itemDisplayContext, isLeft, poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY, model);
 
             poseStack.popPose();
             poseStack.translate(0.0F, 0.0F, 0.09375F * scaleZ);
