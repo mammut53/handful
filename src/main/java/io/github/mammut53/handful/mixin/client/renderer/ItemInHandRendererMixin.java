@@ -1,13 +1,12 @@
 package io.github.mammut53.handful.mixin.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.state.ItemClusterRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -46,23 +45,22 @@ public class ItemInHandRendererMixin {
 
     @Unique
     private void renderItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final boolean isLeftHand, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
-        // Do this to get the item model early
-        final Minecraft minecraft = Minecraft.getInstance();
-        final ItemRenderer itemRenderer = minecraft.getItemRenderer();
-        final BakedModel model = itemRenderer.getModel(itemStack, livingEntity.level(), livingEntity, light);
+        // Update scratchItemStackRenderState to the item model, so we can get isGui3d
+        final ItemStackRenderState itemStackRenderState = this.itemRenderer.scratchItemStackRenderState;
+        this.itemRenderer.resolver.updateForTopItem(itemStackRenderState, itemStack, itemDisplayContext, isLeftHand, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
 
-        final boolean isGui3d = model.isGui3d();
-
+        final boolean isGui3d = itemStackRenderState.isGui3d();
         if (isGui3d) {
             this.renderStatic(livingEntity, itemStack, itemDisplayContext, isLeftHand, poseStack, multiBufferSource, light);
             return;
         }
 
-        this.random.setSeed(ItemEntityRenderer.getSeedForItemStack(itemStack));
+        this.random.setSeed(ItemClusterRenderState.getSeedForItemStack(itemStack));
 
-        final int renderedAmount = ItemEntityRenderer.getRenderedAmount(itemStack.getCount());
-        final float scaleX = isLeftHand ? -model.getTransforms().firstPersonLeftHand.scale.x() : model.getTransforms().firstPersonRightHand.scale.x();
+        final float x = itemStackRenderState.transform().scale.x();
+        final float scaleX = isLeftHand ? -x : x;
 
+        final int renderedAmount = ItemClusterRenderState.getRenderedAmount(itemStack.getCount());
         for (int i = 0; i < renderedAmount; i++) {
             poseStack.pushPose();
 
@@ -81,6 +79,10 @@ public class ItemInHandRendererMixin {
 
     @Unique
     private void renderStatic(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final boolean isLeftHand, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
+        /*
+        Call this.itemRenderer.renderStatic instead of this.itemRenderer.scratchItemStackRenderState.render
+        to be a bit more compatible with other mods doing stuff to itemRenderer
+        */
         this.itemRenderer.renderStatic(
                 livingEntity,
                 itemStack,

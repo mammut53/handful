@@ -30,6 +30,8 @@ repositories {
     unimined.wagYourMaven("releases")
 }
 
+unimined.useGlobalCache = false
+
 unimined.minecraft {
     version minecraft_version
 
