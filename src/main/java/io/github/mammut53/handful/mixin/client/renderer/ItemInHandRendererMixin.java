@@ -3,6 +3,7 @@ package io.github.mammut53.handful.mixin.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.state.ItemClusterRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
@@ -11,6 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,49 +38,49 @@ public class ItemInHandRendererMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void injectItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final boolean isLeftHand, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light, final CallbackInfo ci) {
+    private void injectItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light, final CallbackInfo ci) {
         if (!itemStack.isEmpty()) {
-            renderItemCluster(livingEntity, itemStack, itemDisplayContext, isLeftHand, poseStack, multiBufferSource, light);
+            renderItemCluster(livingEntity, itemStack, itemDisplayContext, poseStack, multiBufferSource, light);
         }
         ci.cancel();
     }
 
     @Unique
-    private void renderItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final boolean isLeftHand, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
-        // Update scratchItemStackRenderState to the item model, so we can get isGui3d
+    private void renderItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
+        // Update scratchItemStackRenderState to the item model, so we can get scaleX
         final ItemStackRenderState itemStackRenderState = this.itemRenderer.scratchItemStackRenderState;
-        this.itemRenderer.resolver.updateForTopItem(itemStackRenderState, itemStack, itemDisplayContext, isLeftHand, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
+        this.itemRenderer.resolver.updateForTopItem(itemStackRenderState, itemStack, itemDisplayContext, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
 
-        final boolean isGui3d = itemStackRenderState.isGui3d();
-        if (isGui3d) {
-            this.renderStatic(livingEntity, itemStack, itemDisplayContext, isLeftHand, poseStack, multiBufferSource, light);
+        final AABB aabb = ItemEntityRenderer.calculateModelBoundingBox(itemStackRenderState);
+        final float scaleX = (float) aabb.getXsize();
+        if (scaleX > 0.0625F) {
+            this.renderStatic(livingEntity, itemStack, itemDisplayContext, poseStack, multiBufferSource, light);
             return;
         }
 
+        final float xOffset = 1.5F * (itemDisplayContext.leftHand() ? -scaleX : scaleX);
+
         this.random.setSeed(ItemClusterRenderState.getSeedForItemStack(itemStack));
-
-        final float x = itemStackRenderState.transform().scale.x();
-        final float scaleX = isLeftHand ? -x : x;
-
         final int renderedAmount = ItemClusterRenderState.getRenderedAmount(itemStack.getCount());
-        for (int i = 0; i < renderedAmount; i++) {
+
+        this.renderStatic(livingEntity, itemStack, itemDisplayContext, poseStack, multiBufferSource, light);
+        poseStack.translate(xOffset, 0.0F, 0.0F);
+        for (int i = 1; i < renderedAmount; ++i) {
             poseStack.pushPose();
 
-            if (i > 0) {
-                final float randomTranslateY = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                final float randomTranslateZ = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                poseStack.translate(0.0F, randomTranslateY, randomTranslateZ);
-            }
+            final float randomTranslateY = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+            final float randomTranslateZ = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+            poseStack.translate(0.0F, randomTranslateY, randomTranslateZ);
 
-            this.renderStatic(livingEntity, itemStack, itemDisplayContext, isLeftHand, poseStack, multiBufferSource, light);
+            this.renderStatic(livingEntity, itemStack, itemDisplayContext, poseStack, multiBufferSource, light);
 
             poseStack.popPose();
-            poseStack.translate(0.09375F * scaleX, 0.0F, 0.0F);
+            poseStack.translate(xOffset, 0.0F, 0.0F);
         }
     }
 
     @Unique
-    private void renderStatic(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final boolean isLeftHand, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
+    private void renderStatic(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
         /*
         Call this.itemRenderer.renderStatic instead of this.itemRenderer.scratchItemStackRenderState.render
         to be a bit more compatible with other mods doing stuff to itemRenderer
@@ -87,7 +89,6 @@ public class ItemInHandRendererMixin {
                 livingEntity,
                 itemStack,
                 itemDisplayContext,
-                isLeftHand,
                 poseStack,
                 multiBufferSource,
                 livingEntity.level(),

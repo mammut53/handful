@@ -5,6 +5,7 @@ import io.github.mammut53.handful.client.renderer.entity.state.ArmedEntityRender
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -52,30 +54,33 @@ public abstract class ItemInHandLayerMixin<S extends ArmedEntityRenderState, M e
             case LEFT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).getLeftHandItemStack();
         };
 
-        final boolean isGui3d = itemStackRenderState.isGui3d();
-        if (isGui3d) {
+        final AABB aabb = ItemEntityRenderer.calculateModelBoundingBox(itemStackRenderState);
+        final float scaleZ = (float) aabb.getZsize();
+        if (scaleZ > 0.0625F) {
             itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
             return;
         }
 
-        final float scaleZ = itemStackRenderState.transform().scale.z();
+        final float zOffset = 1.5F * scaleZ;
+
         poseStack.translate(0.0F, 0.0F, -0.01F);
 
         this.random.setSeed(ItemClusterRenderState.getSeedForItemStack(itemStack));
         final int renderedAmount = ItemClusterRenderState.getRenderedAmount(itemStack.getCount());
-        for (int i = 0; i < renderedAmount; i++) {
+
+        itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
+        poseStack.translate(0.0F, 0.0F, zOffset);
+        for (int i = 1; i < renderedAmount; ++i) {
             poseStack.pushPose();
 
-            if (i > 0) {
-                final float randomTranslateX = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                final float randomTranslateY = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                poseStack.translate(randomTranslateX, randomTranslateY, 0.0F);
-            }
+            final float randomTranslateX = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+            final float randomTranslateY = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+            poseStack.translate(randomTranslateX, randomTranslateY, 0.0F);
 
             itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
 
             poseStack.popPose();
-            poseStack.translate(0.0F, 0.0F, 0.09375F * scaleZ);
+            poseStack.translate(0.0F, 0.0F, zOffset);
         }
     }
 }
