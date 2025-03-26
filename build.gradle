@@ -106,23 +106,23 @@ unimined.minecraft(sourceSets.neoforge) {
         off = false
 
         config("client") {
-            jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
+            /*jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
 
             def mixinJar = configurations.runtimeClasspath.files.find { it.name.contains("mixin") }
             if (mixinJar != null) {
                 jvmArgs += "-javaagent:${mixinJar.absolutePath}"
-            }
+            }*/
 
             workingDir = file("$projectDir/run/neoforge/client")
         }
 
         config("server") {
-            jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
+            /*jvmArgs += "-XX:+AllowEnhancedClassRedefinition"
 
             def mixinJar = configurations.runtimeClasspath.files.find { it.name.contains("mixin") }
             if (mixinJar != null) {
                 jvmArgs += "-javaagent:${mixinJar.absolutePath}"
-            }
+            }*/
 
             workingDir = file("$projectDir/run/neoforge/server")
         }
