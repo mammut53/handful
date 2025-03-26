@@ -22,13 +22,13 @@ config = "${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"
-versionRange="[20.6.1-beta,)"
+versionRange="[20.5.0-beta,)"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.${mod_id}]]
 modId="minecraft"
 type="required"
-versionRange="[1.20.6,)"
+versionRange="[1.20.5,)"
 ordering="NONE"
 side="CLIENT"
