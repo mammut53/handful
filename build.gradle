@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "xyz.wagyourtail.unimined" version "1.3.13"
+    id "xyz.wagyourtail.unimined" version "1.4.1"
 }
 
 group group
@@ -37,10 +37,8 @@ unimined.minecraft {
 
     mappings {
         mojmap()
-        officialMappingsFromJar()
 
         devNamespace "mojmap"
-        devFallbackNamespace "official"
     }
 
     accessWidener {
@@ -139,8 +137,8 @@ dependencies {
     implementation "org.spongepowered:mixin:0.8.7-SNAPSHOT"
 
     // Fabric API for Mod Menu
-    // wait for 1.25.5 release fabricModImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
-    // wait for 1.25.5 release fabricModImplementation "maven.modrinth:modmenu:${modmenu}"
+    // fabricModImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
+    // fabricModImplementation "maven.modrinth:modmenu:${modmenu}"
 }
 
 processResources {
@@ -168,13 +166,16 @@ processNeoforgeResources {
 }
 
 tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from("LICENSE") {}
 }
 
 tasks.named("remapFabricJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveFileName = "${mod_name}-${version}-fabric+mc${minecraft_version}.jar"
 }
 
 tasks.named("remapNeoforgeJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveFileName = "${mod_name}-${version}-neoforge+mc${minecraft_version}.jar"
 }
