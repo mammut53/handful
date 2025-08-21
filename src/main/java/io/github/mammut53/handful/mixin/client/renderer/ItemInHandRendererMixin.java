@@ -3,7 +3,6 @@ package io.github.mammut53.handful.mixin.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.state.ItemClusterRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
@@ -51,7 +50,7 @@ public class ItemInHandRendererMixin {
         final ItemStackRenderState itemStackRenderState = this.itemRenderer.scratchItemStackRenderState;
         this.itemRenderer.resolver.updateForTopItem(itemStackRenderState, itemStack, itemDisplayContext, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
 
-        final AABB aabb = ItemEntityRenderer.calculateModelBoundingBox(itemStackRenderState);
+        final AABB aabb = itemStackRenderState.getModelBoundingBox();
         final float scaleX = (float) aabb.getXsize();
         if (scaleX > 0.0625F) {
             this.renderStatic(livingEntity, itemStack, itemDisplayContext, poseStack, multiBufferSource, light);

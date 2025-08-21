@@ -2,5 +2,3 @@ accessWidener v2 named
 
 accessible field net/minecraft/client/renderer/entity/ItemRenderer resolver Lnet/minecraft/client/renderer/item/ItemModelResolver;
 accessible field net/minecraft/client/renderer/entity/ItemRenderer scratchItemStackRenderState Lnet/minecraft/client/renderer/item/ItemStackRenderState;
-
-accessible method net/minecraft/client/renderer/entity/ItemEntityRenderer calculateModelBoundingBox (Lnet/minecraft/client/renderer/item/ItemStackRenderState;)Lnet/minecraft/world/phys/AABB;

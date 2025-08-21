@@ -5,7 +5,6 @@ import io.github.mammut53.handful.client.renderer.entity.state.ArmedEntityRender
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -54,7 +53,7 @@ public abstract class ItemInHandLayerMixin<S extends ArmedEntityRenderState, M e
             case LEFT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).getLeftHandItemStack();
         };
 
-        final AABB aabb = ItemEntityRenderer.calculateModelBoundingBox(itemStackRenderState);
+        final AABB aabb = itemStackRenderState.getModelBoundingBox();
         final float scaleZ = (float) aabb.getZsize();
         if (scaleZ > 0.0625F) {
             itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
