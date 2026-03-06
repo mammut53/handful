@@ -23,7 +23,7 @@
     "handful.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.18",
+    "fabricloader": ">=0.17",
     "minecraft": ">=1.21.9",
     "java": ">=21"
   },
