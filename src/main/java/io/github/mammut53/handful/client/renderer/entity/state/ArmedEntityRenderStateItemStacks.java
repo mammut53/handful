@@ -4,8 +4,8 @@ import net.minecraft.world.item.ItemStack;
 
 public interface ArmedEntityRenderStateItemStacks {
 
-    ItemStack getRightHandItemStack();
+    ItemStack handful$getRightHandItemStack();
 
-    ItemStack getLeftHandItemStack();
+    ItemStack handful$getLeftHandItemStack();
 
 }

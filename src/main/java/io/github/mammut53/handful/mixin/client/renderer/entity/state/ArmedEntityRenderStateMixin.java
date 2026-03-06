@@ -7,6 +7,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -14,15 +15,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ArmedEntityRenderState.class)
 public abstract class ArmedEntityRenderStateMixin implements ArmedEntityRenderStateItemStacks {
 
-    private ItemStack rightHandItemStack = ItemStack.EMPTY;
-    private ItemStack leftHandItemStack = ItemStack.EMPTY;
+    @Unique
+    private ItemStack handful$rightHandItemStack = ItemStack.EMPTY;
+    @Unique
+    private ItemStack handful$leftHandItemStack = ItemStack.EMPTY;
 
-    public ItemStack getRightHandItemStack() {
-        return rightHandItemStack;
+    public ItemStack handful$getRightHandItemStack() {
+        return handful$rightHandItemStack;
     }
 
-    public ItemStack getLeftHandItemStack() {
-        return leftHandItemStack;
+    public ItemStack handful$getLeftHandItemStack() {
+        return handful$leftHandItemStack;
     }
 
     @Inject(
@@ -30,8 +33,8 @@ public abstract class ArmedEntityRenderStateMixin implements ArmedEntityRenderSt
         at = @At("HEAD")
     )
     private static void injectExtractItemStacks(final LivingEntity livingEntity, final ArmedEntityRenderState armedEntityRenderState, final ItemModelResolver itemModelResolver, final CallbackInfo ci) {
-        ((ArmedEntityRenderStateMixin)(Object) armedEntityRenderState).rightHandItemStack = livingEntity.getItemHeldByArm(HumanoidArm.RIGHT);
-        ((ArmedEntityRenderStateMixin)(Object) armedEntityRenderState).leftHandItemStack = livingEntity.getItemHeldByArm(HumanoidArm.LEFT);
+        ((ArmedEntityRenderStateMixin)(Object) armedEntityRenderState).handful$rightHandItemStack = livingEntity.getItemHeldByArm(HumanoidArm.RIGHT);
+        ((ArmedEntityRenderStateMixin)(Object) armedEntityRenderState).handful$leftHandItemStack = livingEntity.getItemHeldByArm(HumanoidArm.LEFT);
     }
 
 }

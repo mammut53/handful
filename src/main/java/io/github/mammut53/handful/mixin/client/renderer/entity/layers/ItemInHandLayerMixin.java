@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.mammut53.handful.client.renderer.entity.state.ArmedEntityRenderStateItemStacks;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -26,37 +26,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ItemInHandLayerMixin<S extends ArmedEntityRenderState, M extends EntityModel<S> & ArmedModel> extends RenderLayer<S, M> {
 
     @Unique
-    private final RandomSource random = RandomSource.create();
+    private final RandomSource handful$random = RandomSource.create();
 
     protected ItemInHandLayerMixin(final RenderLayerParent<S, M> renderLayerParent) {
         super(renderLayerParent);
     }
 
     @Inject(
-            method = "renderArmWithItem",
+            method = "submitArmWithItem",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/item/ItemStackRenderState;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V"
+                    target = "Lnet/minecraft/client/renderer/item/ItemStackRenderState;submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;III)V"
             ),
             cancellable = true
     )
-    private void injectItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final HumanoidArm humanoidArm, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light, final CallbackInfo ci) {
-        this.renderItemCluster(armedEntityRenderState, itemStackRenderState, humanoidArm, poseStack, multiBufferSource, light);
+    private void injectItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final HumanoidArm humanoidArm, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light, final CallbackInfo ci) {
+        this.handful$renderItemCluster(armedEntityRenderState, itemStackRenderState, humanoidArm, poseStack, submitNodeCollector, light);
         poseStack.popPose();
         ci.cancel();
     }
 
     @Unique
-    private void renderItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final HumanoidArm humanoidArm, final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int light) {
+    private void handful$renderItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final HumanoidArm humanoidArm, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light) {
         final ItemStack itemStack = switch (humanoidArm) {
-            case RIGHT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).getRightHandItemStack();
-            case LEFT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).getLeftHandItemStack();
+            case RIGHT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).handful$getRightHandItemStack();
+            case LEFT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).handful$getLeftHandItemStack();
         };
 
         final AABB aabb = itemStackRenderState.getModelBoundingBox();
         final float scaleZ = (float) aabb.getZsize();
         if (scaleZ > 0.0625F) {
-            itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
+            itemStackRenderState.submit(poseStack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, armedEntityRenderState.outlineColor);
             return;
         }
 
@@ -64,19 +64,19 @@ public abstract class ItemInHandLayerMixin<S extends ArmedEntityRenderState, M e
 
         poseStack.translate(0.0F, 0.0F, -0.01F);
 
-        this.random.setSeed(ItemClusterRenderState.getSeedForItemStack(itemStack));
+        this.handful$random.setSeed(ItemClusterRenderState.getSeedForItemStack(itemStack));
         final int renderedAmount = ItemClusterRenderState.getRenderedAmount(itemStack.getCount());
 
-        itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
+        itemStackRenderState.submit(poseStack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, armedEntityRenderState.outlineColor);
         poseStack.translate(0.0F, 0.0F, zOffset);
         for (int i = 1; i < renderedAmount; ++i) {
             poseStack.pushPose();
 
-            final float randomTranslateX = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-            final float randomTranslateY = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+            final float randomTranslateX = (this.handful$random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+            final float randomTranslateY = (this.handful$random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
             poseStack.translate(randomTranslateX, randomTranslateY, 0.0F);
 
-            itemStackRenderState.render(poseStack, multiBufferSource, light, OverlayTexture.NO_OVERLAY);
+            itemStackRenderState.submit(poseStack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, armedEntityRenderState.outlineColor);
 
             poseStack.popPose();
             poseStack.translate(0.0F, 0.0F, zOffset);
