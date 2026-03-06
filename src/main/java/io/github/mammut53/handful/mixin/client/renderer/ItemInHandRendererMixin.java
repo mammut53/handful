@@ -3,7 +3,6 @@ package io.github.mammut53.handful.mixin.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.state.ItemClusterRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
@@ -27,15 +26,9 @@ public class ItemInHandRendererMixin {
     @Mutable
     @Final
     @Shadow
-    private final ItemRenderer itemRenderer;
-
-    @Mutable
-    @Final
-    @Shadow
     private final ItemModelResolver itemModelResolver;
 
-    public ItemInHandRendererMixin(final ItemRenderer itemRenderer, final ItemModelResolver itemModelResolver) {
-        this.itemRenderer = itemRenderer;
+    public ItemInHandRendererMixin(final ItemModelResolver itemModelResolver) {
         this.itemModelResolver = itemModelResolver;
     }
 

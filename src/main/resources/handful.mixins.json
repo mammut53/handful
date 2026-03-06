@@ -6,8 +6,7 @@
   "mixins": [],
   "client": [
     "client.renderer.ItemInHandRendererMixin",
-    "client.renderer.entity.layers.ItemInHandLayerMixin",
-    "client.renderer.entity.state.ArmedEntityRenderStateMixin"
+    "client.renderer.entity.layers.ItemInHandLayerMixin"
   ],
   "server": [],
   "injectors": {}

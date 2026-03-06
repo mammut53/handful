@@ -1,7 +1,6 @@
 package io.github.mammut53.handful.mixin.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.mammut53.handful.client.renderer.entity.state.ArmedEntityRenderStateItemStacks;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -40,19 +39,14 @@ public abstract class ItemInHandLayerMixin<S extends ArmedEntityRenderState, M e
             ),
             cancellable = true
     )
-    private void injectItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final HumanoidArm humanoidArm, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light, final CallbackInfo ci) {
-        this.handful$renderItemCluster(armedEntityRenderState, itemStackRenderState, humanoidArm, poseStack, submitNodeCollector, light);
+    private void injectItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final ItemStack itemStack, final HumanoidArm humanoidArm, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light, final CallbackInfo ci) {
+        this.handful$renderItemCluster(armedEntityRenderState, itemStackRenderState, itemStack, humanoidArm, poseStack, submitNodeCollector, light);
         poseStack.popPose();
         ci.cancel();
     }
 
     @Unique
-    private void handful$renderItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final HumanoidArm humanoidArm, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light) {
-        final ItemStack itemStack = switch (humanoidArm) {
-            case RIGHT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).handful$getRightHandItemStack();
-            case LEFT -> ((ArmedEntityRenderStateItemStacks) armedEntityRenderState).handful$getLeftHandItemStack();
-        };
-
+    private void handful$renderItemCluster(final S armedEntityRenderState, final ItemStackRenderState itemStackRenderState, final ItemStack itemStack, final HumanoidArm humanoidArm, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light) {
         final AABB aabb = itemStackRenderState.getModelBoundingBox();
         final float scaleZ = (float) aabb.getZsize();
         if (scaleZ > 0.0625F) {
