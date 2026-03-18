@@ -24,10 +24,9 @@
   ],
   "depends": {
     "fabricloader": ">=0.17",
-    "minecraft": ">=1.21.11",
-    "java": ">=21"
+    "minecraft": ">1.21.11",
+    "java": ">=25"
   },
-  "accessWidener" : "handful.accesswidener",
   "custom": {
     "loom:injected_interfaces": {
       "net/minecraft/class_10426": ["io/github/mammut53/handful/client/renderer/entity/state/ArmedEntityRenderStateItemStacks"]
