@@ -30,8 +30,6 @@ repositories {
     unimined.wagYourMaven("releases")
 }
 
-unimined.useGlobalCache = false
-
 unimined.minecraft(sourceSets.main) {
     version minecraft_version
 
@@ -86,7 +84,7 @@ unimined.minecraft(sourceSets.fabric) {
         }
     }
 }
-/*
+
 unimined.minecraft(sourceSets.neoforge) {
     combineWith(sourceSets.main)
 
@@ -123,7 +121,7 @@ unimined.minecraft(sourceSets.neoforge) {
             workingDir = file("$projectDir/run/neoforge/server")
         }
     }
-}*/
+}
 
 configurations {
     mainImplementation
@@ -133,8 +131,8 @@ dependencies {
     implementation "org.spongepowered:mixin:0.8.7-SNAPSHOT"
 
     // Fabric API for Mod Menu
-    // fabricModImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
-    // fabricModImplementation "maven.modrinth:modmenu:${modmenu}"
+    fabricModImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api}"
+    fabricModImplementation "maven.modrinth:modmenu:${modmenu}"
 }
 
 processResources {
@@ -152,14 +150,14 @@ processFabricResources {
         expand project.properties
     }
 }
-/*
+
 processNeoforgeResources {
     inputs.property "version", version
 
     filesMatching("META-INF/neoforge.mods.toml") {
         expand project.properties
     }
-}*/
+}
 
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -170,8 +168,8 @@ tasks.named("remapFabricJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveFileName = "${mod_name}-${version}-fabric+mc${minecraft_version}.jar"
 }
-/*
+
 tasks.named("remapNeoforgeJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveFileName = "${mod_name}-${version}-neoforge+mc${minecraft_version}.jar"
-}*/
+}

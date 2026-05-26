@@ -37,30 +37,30 @@ public class ItemInHandRendererMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void injectItemCluster(final LivingEntity livingEntity, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light, final CallbackInfo ci) {
+    private void injectItemCluster(final LivingEntity mob, final ItemStack itemStack, final ItemDisplayContext type, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int lightCoords, final CallbackInfo ci) {
         if (!itemStack.isEmpty()) {
             final ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
-            this.itemModelResolver.updateForTopItem(itemStackRenderState, itemStack, itemDisplayContext, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
-            this.handful$renderItemCluster(itemStackRenderState, itemStack, itemDisplayContext, poseStack, submitNodeCollector, light);
+            this.itemModelResolver.updateForTopItem(itemStackRenderState, itemStack, type, mob.level(), mob, mob.getId() + type.ordinal());
+            this.handful$renderItemCluster(itemStackRenderState, itemStack, type, poseStack, submitNodeCollector, lightCoords);
         }
         ci.cancel();
     }
 
     @Unique
-    private void handful$renderItemCluster(final ItemStackRenderState itemStackRenderState, final ItemStack itemStack, final ItemDisplayContext itemDisplayContext, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int light) {
-        final AABB aabb = itemStackRenderState.getModelBoundingBox();
+    private void handful$renderItemCluster(final ItemStackRenderState state, final ItemStack itemStack, final ItemDisplayContext type, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int lightCoords) {
+        final AABB aabb = state.getModelBoundingBox();
         final float scaleX = (float) aabb.getXsize();
         if (scaleX > 0.0625F) {
-            itemStackRenderState.submit(poseStack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, 0);
+            state.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, 0);
             return;
         }
 
-        final float xOffset = 1.5F * (itemDisplayContext.leftHand() ? -scaleX : scaleX);
+        final float xOffset = 1.5F * (type.leftHand() ? -scaleX : scaleX);
 
         this.handful$random.setSeed(ItemClusterRenderState.getSeedForItemStack(itemStack));
         final int renderedAmount = ItemClusterRenderState.getRenderedAmount(itemStack.getCount());
 
-        itemStackRenderState.submit(poseStack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, 0);
+        state.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, 0);
         poseStack.translate(xOffset, 0.0F, 0.0F);
         for (int i = 1; i < renderedAmount; ++i) {
             poseStack.pushPose();
@@ -69,7 +69,7 @@ public class ItemInHandRendererMixin {
             final float randomTranslateZ = (this.handful$random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
             poseStack.translate(0.0F, randomTranslateY, randomTranslateZ);
 
-            itemStackRenderState.submit(poseStack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, 0);
+            state.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, 0);
 
             poseStack.popPose();
             poseStack.translate(xOffset, 0.0F, 0.0F);
