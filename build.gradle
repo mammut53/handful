@@ -36,7 +36,7 @@ unimined.minecraft(sourceSets.main) {
     mappings {}
 
     /*accessWidener {
-        accessWidener "${projectDir}/src/main/resources/${mod_id}.accesswidener"
+        accessWidener "${projectDir}/src/main/resources/${mod_id}.classtweaker"
     }*/
 
     if (sourceSet == sourceSets.main) {
@@ -53,7 +53,7 @@ unimined.minecraft(sourceSets.fabric) {
 
     fabric {
         loader fabric_loader
-        //accessWidener "${projectDir}/src/main/resources/${mod_id}.accesswidener"
+        //accessWidener "${projectDir}/src/main/resources/${mod_id}.classtweaker"
     }
 
     defaultRemapJar = true
@@ -85,13 +85,13 @@ unimined.minecraft(sourceSets.fabric) {
     }
 }
 
-/*unimined.minecraft(sourceSets.neoforge) {
+unimined.minecraft(sourceSets.neoforge) {
     combineWith(sourceSets.main)
 
     neoForge() {
         loader neoforge_version
         mixinConfig("${mod_id}.mixins.json")
-        //accessTransformer aw2at("${projectDir}/src/main/resources/${mod_id}.accesswidener")
+        //accessTransformer aw2at("${projectDir}/src/main/resources/${mod_id}.classtweaker")
     }
 
     defaultRemapJar = true
@@ -121,7 +121,7 @@ unimined.minecraft(sourceSets.fabric) {
             workingDir = file("$projectDir/run/neoforge/server")
         }
     }
-}*/
+}
 
 configurations {
     mainImplementation
@@ -150,14 +150,14 @@ processFabricResources {
         expand project.properties
     }
 }
-/*
+
 processNeoforgeResources {
     inputs.property "version", version
 
     filesMatching("META-INF/neoforge.mods.toml") {
         expand project.properties
     }
-}*/
+}
 
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -165,11 +165,9 @@ tasks.withType(Jar).configureEach {
 }
 
 tasks.named("remapFabricJar") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveFileName = "${mod_name}-${version}-fabric+mc${minecraft_version}.jar"
+    archiveFileName = "${mod_id}-${minecraft_version}+${version}-fabric.jar"
 }
-/*
+
 tasks.named("remapNeoforgeJar") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveFileName = "${mod_name}-${version}-neoforge+mc${minecraft_version}.jar"
-}*/
+    archiveFileName = "${mod_id}-${minecraft_version}+${version}-neoforge.jar"
+}
